@@ -147,15 +147,51 @@ class InferenceHelper:
 
             Image.fromarray(final).save(save_path)
 
+def full_dataset():
+    from pathlib import Path
+    from glob import glob
+    base = "/home/jonfrey/datasets/scannet"
+    image_pths = [str(p) for p in glob( base+'/**/*.jpg', recursive=True ) if str(p).find('color') != -1]
+    fun = lambda x : int( x.split('/')[-1][:-4]) 
+    image_pths.sort(key=fun)
+    inferHelper = InferenceHelper(  dataset='nyu', device='cuda:1' )
+
+    from torchvision import transforms as tf 
+    import torch
+    tra = torch.nn.Sequential(
+        tf.Resize((480,640))
+    )
+    for j, i in enumerate( image_pths) :
+        img = tra( Image.open( i ) )
+        img2 = Image.open("test_imgs/classroom__rgb_00283.jpg")
+        start = time()
+        centers, pred = inferHelper.predict_pil(img)
+        print(f"took :{time() - start}s")
+        plt.imshow(pred.squeeze(), cmap='magma_r')
+        
+        Path( os.path.join( str(Path(i).parent.parent),'depth_estimate') ).mkdir(exist_ok=True)
+
+        save_path = os.path.join( str(Path(i).parent.parent),'depth_estimate/'+ i.split('/')[-1] )
+        
+        plt.savefig(save_path)
+        print(j,i,save_path)
+        
+        if j > 1:
+            break
 
 if __name__ == '__main__':
     import matplotlib.pyplot as plt
     from time import time
+    full_dataset()
+    
+    # img = Image.open("test_imgs/classroom__rgb_00283.jpg")
+    # start = time()
+    # inferHelper = InferenceHelper()
+    # centers, pred = inferHelper.predict_pil(img)
+    # print(f"took :{time() - start}s")
+    # plt.imshow(pred.squeeze(), cmap='magma_r')
+    # plt.savefig('test_imgs/depth_estimate.jpg')
 
-    img = Image.open("test_imgs/classroom__rgb_00283.jpg")
-    start = time()
-    inferHelper = InferenceHelper()
-    centers, pred = inferHelper.predict_pil(img)
-    print(f"took :{time() - start}s")
-    plt.imshow(pred.squeeze(), cmap='magma_r')
-    plt.show()
+
+
+    
