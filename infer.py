@@ -171,7 +171,7 @@ def full_dataset():
         
         Path( os.path.join( str(Path(i).parent.parent),'depth_estimate') ).mkdir(exist_ok=True)
 
-        save_path = os.path.join( str(Path(i).parent.parent),'depth_estimate/'+ i.split('/')[-1] )
+        save_path = os.path.join( str(Path(i).parent.parent),'depth/'+ i.split('/')[-1] )
         
         plt.savefig(save_path)
         print(j,i,save_path)
